@@ -4,28 +4,28 @@ use PHPUnit\Framework\TestCase;
 
 class CyberSourceSoapClientTest extends TestCase
 {
+    var $defaultProperties = [
+        'merchant_id' => 'PUT MERCHANT ID HERE',
+        'transaction_key' => 'PLACE YOUR TRANSACTION KEY HERE',
+        'wsdl' => 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.153.wsdl',
+        'nvp_wsdl' => 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_NVP_1.153.wsdl',
+    ];
 
-
-    public function testBasicPaymentWithArray()
+    private function generatePayment($properties, $auth = true, $captura = false, $customerName = 'normal')
     {
-        $properties = [
-            //Place the values here
-        ];
-
-        $this->assertNotEquals(false, $properties);
         $client = new \Cybersource\SOAP\CybersourceSoapClient([], $properties);
         $request = $client->createRequest('123456789');
 
         $ccAuthService = new stdClass();
-        $ccAuthService->run = 'true';
+        $ccAuthService->run = ($auth) ? 'true' : 'false';
         $request->ccAuthService = $ccAuthService;
 
         $ccCaptureService = new stdClass();
-        $ccCaptureService->run = 'true';
+        $ccCaptureService->run = ($captura) ? 'true' : 'false';
         $request->ccCaptureService = $ccCaptureService;
 
         $billTo = new stdClass();
-        $billTo->firstName = 'John';
+        $billTo->firstName = $customerName;
         $billTo->lastName = 'Doe';
 
 
@@ -55,10 +55,68 @@ class CyberSourceSoapClientTest extends TestCase
         $request->purchaseTotals = $purchaseTotals;
 
         //$request->ics_applications = 'ics_ecp_debit';
-        // Populate $request here with other necessary properties
 
 
-        $reply = $client->runTransaction($request);
-        print_r($reply);
+        return $client->runTransaction($request);
+    }
+
+    public function testBasicPaymentWithArray()
+    {
+        $returnData = $this->generatePayment($this->defaultProperties, true, false);
+        $this->assertIsNumeric($returnData->requestID);
+    }
+
+    public function testBasicReverseWithArray()
+    {
+        $returnData = $this->generatePayment($this->defaultProperties, true, false, 'reverseMe');
+        $this->assertIsNumeric($returnData->requestID);
+
+        $client = new \Cybersource\SOAP\CybersourceSoapClient([], $this->defaultProperties);
+        $request = $client->createRequest('123456789');
+
+        $ccAuthReversalService = new stdClass();
+        $ccAuthReversalService->run = 'true';
+        $ccAuthReversalService->authRequestID = $returnData->requestID;
+        $request->ccAuthReversalService = $ccAuthReversalService;
+
+
+        $purchaseTotals = new stdClass();
+        $purchaseTotals->currency = 'USD';
+        $purchaseTotals->grandTotalAmount = '90.01';
+        $request->purchaseTotals = $purchaseTotals;
+
+        //$request->ics_applications = 'ics_ecp_debit';
+
+
+        $result = $client->runTransaction($request);
+
+        $this->assertEquals('100', $result->reasonCode);
+    }
+
+    public function testBasicCaptureWithArray()
+    {
+        $returnData = $this->generatePayment($this->defaultProperties, true, false, 'captureAfter');
+        $this->assertIsNumeric($returnData->requestID);
+
+        $client = new \Cybersource\SOAP\CybersourceSoapClient([], $this->defaultProperties);
+        $request = $client->createRequest('123456789');
+
+        $ccCaptureService = new stdClass();
+        $ccCaptureService->run = 'true';
+        $ccCaptureService->authRequestID = $returnData->requestID;
+        $request->ccCaptureService = $ccCaptureService;
+
+
+        $purchaseTotals = new stdClass();
+        $purchaseTotals->currency = 'USD';
+        $purchaseTotals->grandTotalAmount = '90.01';
+        $request->purchaseTotals = $purchaseTotals;
+
+        //$request->ics_applications = 'ics_ecp_debit';
+
+
+        $result = $client->runTransaction($request);
+
+        $this->assertEquals('100', $result->reasonCode);
     }
 }
