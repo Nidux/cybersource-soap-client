@@ -2,7 +2,9 @@
 
 namespace Cybersource\SOAP;
 
+use Exception;
 use SimpleXMLElement;
+use stdClass;
 
 /**
  * CybersourceSoapClient
@@ -21,7 +23,7 @@ class CybersourceSoapClient extends CyberSourceClient
                 $properties = parse_ini_file($propertiesOrFilePath);
             }
             else{
-                throw new \Exception('You must provide either an array with the required information or an accesible filepath .ini file');
+                throw new Exception('You must provide either an array with the required information or an accesible filepath .ini file');
             }
 
         }
@@ -37,12 +39,12 @@ class CybersourceSoapClient extends CyberSourceClient
      * Returns a properly formatted request object from a SimpleXMLElement. 
      *
      * @param SimpleXMLElement $simpleXml Representation of an XML structure
-     * @return \stdClass A request with the data from the SimpleXMLElement.
+     * @return stdClass A request with the data from the SimpleXMLElement.
      */
     public function simpleXmlToCybsRequest($simpleXml)
     {
         $vars = get_object_vars($simpleXml);
-        $request = new \stdClass();
+        $request = new stdClass();
 
         foreach(array_keys($vars) as $key) {
             $element = $vars[$key];
@@ -77,11 +79,11 @@ class CybersourceSoapClient extends CyberSourceClient
      * Returns an object initialized with basic client information.
      *
      * @param string $merchantReferenceCode Desired reference code for the request
-     * @return \stdClass An object initialized with the basic client info.
+     * @return stdClass An object initialized with the basic client info.
      */
     public function createRequest($merchantReferenceCode)
     {
-        $request = new \stdClass();
+        $request = new stdClass();
         $request->merchantID = $this->getMerchantId();
         $request->merchantReferenceCode = $merchantReferenceCode;
         $request->clientLibrary = self::CLIENT_LIBRARY_VERSION;
@@ -95,7 +97,7 @@ class CybersourceSoapClient extends CyberSourceClient
      *
      * @param string $filePath The path to the XML file
      * @param string $merchantReferenceCode Desired reference code for the request
-     * @return \stdClass An object representation of the transaction response.
+     * @return stdClass An object representation of the transaction response.
      */
     public function runTransactionFromXml($filePath, $merchantReferenceCode)
     {
@@ -111,7 +113,7 @@ class CybersourceSoapClient extends CyberSourceClient
      *
      * @param string $filePath The path to the XML file
      * @param string $merchantReferenceCode Desired reference code for the request
-     * @return \stdClass An object representation of the transaction response.
+     * @return stdClass An object representation of the transaction response.
      */
     public function runTransactionFromFile($filePath, $merchantReferenceCode)
     {

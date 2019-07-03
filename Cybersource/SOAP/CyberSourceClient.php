@@ -2,9 +2,11 @@
 
 namespace Cybersource\SOAP;
 
+use Exception;
 use SoapClient;
 use SoapHeader;
 use SoapVar;
+use stdClass;
 
 /**
  * CyberSourceClient
@@ -16,7 +18,7 @@ use SoapVar;
  */
 abstract class CyberSourceClient extends SoapClient
 {
-    const CLIENT_LIBRARY_VERSION = "Nidux CyberSource SOAP CLient 1.0.0";
+    const CLIENT_LIBRARY_VERSION = "Nidux CyberSource SOAP Client 1.0.5";
 
     private $merchantId;
     private $transactionKey;
@@ -26,7 +28,7 @@ abstract class CyberSourceClient extends SoapClient
      * @param array $options
      * @param array $properties
      * @param bool $nvp
-     * @throws \Exception
+     * @throws Exception
      */
     function __construct($options = [], $properties = [], $nvp = false)
     {
@@ -39,8 +41,7 @@ abstract class CyberSourceClient extends SoapClient
 
         $nameSpace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 
-        $soapUsername = new SoapVar(
-            $this->merchantId,
+        $soapUsername = new SoapVar($this->merchantId, 
             XSD_STRING,
             NULL,
             $nameSpace,
@@ -57,9 +58,9 @@ abstract class CyberSourceClient extends SoapClient
             $nameSpace
         );
 
-        $auth = new \stdClass();
+        $auth = new stdClass();
         $auth->Username = $soapUsername;
-        $auth->Password = $soapPassword; 
+        $auth->Password = $soapPassword;
 
         $soapAuth = new SoapVar(
             $auth,
@@ -67,10 +68,10 @@ abstract class CyberSourceClient extends SoapClient
             NULL, $nameSpace,
             'UsernameToken',
             $nameSpace
-        ); 
+        );
 
-        $token = new \stdClass();
-        $token->UsernameToken = $soapAuth; 
+        $token = new stdClass();
+        $token->UsernameToken = $soapAuth;
 
         $soapToken = new SoapVar(
             $token,
@@ -81,7 +82,7 @@ abstract class CyberSourceClient extends SoapClient
             $nameSpace
         );
 
-        $security =new SoapVar(
+        $security = new SoapVar(
             $soapToken,
             SOAP_ENC_OBJECT,
             NULL,
@@ -90,14 +91,14 @@ abstract class CyberSourceClient extends SoapClient
             $nameSpace
         );
 
-        $header = new SoapHeader($nameSpace, 'Security', $security, true); 
-        $this->__setSoapHeaders(array($header)); 
+        $header = new SoapHeader($nameSpace, 'Security', $security, true);
+        $this->__setSoapHeaders(array($header));
     }
 
 
     /**
      * @param array $properties
-     * @throws \Exception
+     * @throws Exception
      */
     private function validateProperties($properties = [])
     {
@@ -106,7 +107,7 @@ abstract class CyberSourceClient extends SoapClient
         {
             if(!isset($properties[$keyToCheck]) || empty($properties[$keyToCheck]))
             {
-                throw new \Exception($keyToCheck.' is missing. Please define this value on you ini file or make sure you are sending this on your constructor');
+                throw new Exception($keyToCheck.' is missing. Please define this value on you ini file or make sure you are sending this on your constructor');
             }
         }
     }

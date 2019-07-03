@@ -3,6 +3,8 @@
 namespace Cybersource\SOAP;
 
 
+use Exception;
+
 /**
  * NVPClient
  *
@@ -21,7 +23,7 @@ class CybersourceNVPClient extends CyberSourceClient
                 $properties = parse_ini_file($propertiesOrFilePath);
             }
             else{
-                throw new \Exception('You must provide either an array with the required information or an accesible filepath .ini file');
+                throw new Exception('You must provide either an array with the required information or an accesible filepath .ini file');
             }
 
         }
@@ -38,12 +40,12 @@ class CybersourceNVPClient extends CyberSourceClient
      *
      * @param string $request An array of name-value pairs
      * @return string Response of name-value pairs delimited by a new line
-     * @throws \Exception
+     * @throws Exception
      */
     public function runTransaction($request)
     {
         if (!is_array($request)) {
-            throw new \Exception('Name-value pairs must be in array');
+            throw new Exception('Name-value pairs must be in array');
         }
         if (!array_key_exists('merchantID', $request)) {
             $request['merchantID'] = $this->getMerchantId();
