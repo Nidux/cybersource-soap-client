@@ -91,3 +91,10 @@ $request['merchantReferenceCode'] = $'my_reference_code';
 $reply = $client->runTransaction($request);
 ```
 
+### How to obtain the CardType
+A helper class is available with the method  ````getCardType($cardNumber)````. You need to provide card number and you will obtain the right CardType value to use in the XML/Object, it will return Null when cannot detect the brand of the card.
+
+
+```php
+$cardTypeValue = CybersourceHelper::getCardType('4111111111111111'); //it will return 001 
+```
